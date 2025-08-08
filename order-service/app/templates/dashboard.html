@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head><title>Dashboard</title></head>
+<body>
+  <h2>Benvenuto {{ username }} (ruolo: {{ role }})</h2>
+
+  {% if role == "admin" %}
+    <h3>Gestione inventario:</h3>
+    <form method="post" action="/inventory/add">
+      <input type="text" name="product_id" placeholder="ID prodotto" required>
+      <input type="number" name="quantity" placeholder="Quantità" required>
+      <button type="submit">Aggiungi prodotto</button>
+    </form>
+
+    <br>
+    <form method="get" action="/inventory/view">
+      <button type="submit">Visualizza inventario</button>
+    </form>
+  
+  {% elif role == "user" %}
+    <h3>Ordina un prodotto:</h3>
+    <form method="post" action="/buy">
+      <input type="hidden" name="username" value="{{ username }}">
+      <input type="text" name="product_id" placeholder="ID prodotto" required>
+      <input type="number" name="quantity" placeholder="Quantità" required>
+      <button type="submit">Ordina</button>
+    </form>
+  {% endif %}
+</body>
+</html>
