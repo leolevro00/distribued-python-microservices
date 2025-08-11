@@ -2,16 +2,23 @@ from fastapi import FastAPI, HTTPException, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from app.db import SessionLocal, init_db
+from db import SessionLocal, init_db
 from sqlalchemy.orm import Session
+from celery import Celery
+import logging
 
-from app.models import User
+from models import User
 import requests
 import os
 
-app=FastAPI()
 
-templates=Jinja2Templates(directory="app/templates")
+logger = logging.getLogger("order")
+celery = Celery("order", broker=os.getenv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq//"))
+
+
+app=FastAPI()
+INVENTORY_URL = "http://inventory-service:80"
+templates=Jinja2Templates(directory="templates")
 init_db()
 
 def get_user_by_username(db: Session, username: str):
@@ -42,10 +49,16 @@ def buy_product(
             "quantity": quantity
         })
         response.raise_for_status()
-        return {"status": "success", "message": "Ordine effettuato"}
+        
     except requests.RequestException:
         raise HTTPException(status_code=500, detail="Errore durante l'ordine")
     
+    # pubblica il task asincrono
+    payload = {"user": username, "product_id": product_id, "quantity": quantity}
+    celery.send_task("notify.send_purchase", args=[payload])
+
+    return {"status": "success", "message": "Ordine effettuato"}
+
 @app.get("/inventory/view")
 def view_inventory():
     try:
@@ -58,6 +71,7 @@ def view_inventory():
 
 @app.post("/inventory/add")
 def add_product(product_id: str = Form(...), quantity: int = Form(...)):
+    print("prodotto da aggiungere: ",product_id, " quantità: ",quantity)
     response = requests.post(f"{INVENTORY_URL}/add", json={
         "product_id": product_id,
         "quantity": quantity
