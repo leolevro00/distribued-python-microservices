@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario</title>
+<style>
+    * { box-sizing: border-box; }
+
+    html, body {
+        height: 100%;
+        margin: 0;
+        font-family: "Inter", system-ui, sans-serif;
+        background: linear-gradient(135deg, #1d2b64, #f8cdda);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 800px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        color: white;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        color: white;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+    }
+
+    th {
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    tr:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transition: background 0.3s ease;
+    }
+
+    .btn-back {
+        display: block;
+        margin: 20px auto 0;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-back:hover {
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+<div class="card">
+    <h2>Inventario Prodotti</h2>
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>Quantità</th>
+        </tr>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.product_id }}</td>
+            <td>{{ product.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <form action="/dashboard" method="get">
+        <input type="hidden" name="username" value="{{ username }}">
+        <input type="hidden" name="role" value="{{ role }}">
+        <button class="btn-back" type="submit">⬅ Torna alla Dashboard</button>
+    </form>
+
+</div>
+</body>
+</html>

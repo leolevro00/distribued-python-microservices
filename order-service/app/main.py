@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Form, Request
+from fastapi import FastAPI, HTTPException, Form, Request, Query
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -27,6 +27,32 @@ def get_user_by_username(db: Session, username: str):
 @app.get("/login",response_class=HTMLResponse)
 def login_page(request:Request) :
     return templates.TemplateResponse("login.html", {"request" : request})
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def get_dashboard(
+    request: Request,
+    username: str = Query(...),
+    role: str = Query(...)
+):
+    print("username:", username, "role: ",role)
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request,
+        "username": username,
+        "role": role
+    })
+
+
+
+@app.get("/inventory/list", response_class=HTMLResponse)
+def inventory_list(request: Request):
+    try:
+        response = requests.get(f"{INVENTORY_URL}/list")
+        response.raise_for_status()
+        products = response.json()
+    except:
+        products = []
+    return templates.TemplateResponse("inventory_list.html", {"request": request, "products": products})
 
 @app.post("/login",response_class=HTMLResponse)
 def login(request: Request,username: str=Form(...),password: str=Form(...)):
